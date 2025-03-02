@@ -1,3 +1,3 @@
 # FinSight
 
-A Serverless ETL Pipeline with Financial Analytics Dashboard
+AWS Serverless ETL Pipeline for financial data processing with analytics dashboard
