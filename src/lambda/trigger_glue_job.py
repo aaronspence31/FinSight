@@ -43,6 +43,7 @@ def lambda_handler(event, context):
         response = glue_client.start_job_run(
             JobName=glue_job_name,
             Arguments={
+                "--input_file_path": f"s3://{bucket}/{key}",
                 "--source_bucket": bucket,
                 "--source_key": key,
                 "--destination_bucket": processed_bucket,
