@@ -47,6 +47,12 @@ def lambda_handler(event, context):
                 )
             else:
                 processed_bucket = f"s3://finsight-dev-processed-output-31v4pvuy/"
+        else:
+            # Ensure the processed bucket has the s3:// prefix when it comes from env var
+            if not processed_bucket.startswith("s3://"):
+                processed_bucket = f"s3://{processed_bucket}/"
+            elif not processed_bucket.endswith("/"):
+                processed_bucket = f"{processed_bucket}/"
 
         print(f"Input bucket: {raw_bucket}")
         print(f"Output bucket: {processed_bucket}")
