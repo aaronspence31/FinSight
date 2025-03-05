@@ -1,3 +1,7 @@
+################################################
+################## S3 Buckets ##################
+################################################
+
 # Generate a random suffix to ensure bucket names are globally unique
 resource "random_string" "bucket_suffix" {
   length  = 8
@@ -81,6 +85,10 @@ resource "aws_s3_bucket_policy" "website" {
   depends_on = [aws_s3_bucket_public_access_block.website]
 }
 
+################################################
+############ Lambda Functions ##################
+################################################
+
 # IAM role for Lambda to access AWS services
 resource "aws_iam_role" "lambda_role" {
   name = "finsight-lambda-trigger-role"
@@ -163,12 +171,12 @@ resource "aws_lambda_function" "trigger_glue_job" {
   role          = aws_iam_role.lambda_role.arn
   environment {
     variables = {
-      GLUE_JOB_NAME = "finsight-etl-job"
+      GLUE_JOB_NAME    = "finsight-etl-job"
       PROCESSED_BUCKET = aws_s3_bucket.processed_data.bucket
     }
   }
-  timeout       = 60
-  memory_size   = 128
+  timeout     = 60
+  memory_size = 128
   tags = {
     Name        = "ETL Trigger Function"
     Environment = var.environment
@@ -198,4 +206,89 @@ resource "aws_lambda_permission" "allow_bucket" {
   function_name = aws_lambda_function.trigger_glue_job.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.raw_data.arn
+}
+
+################################################
+############ Glue Jobs #########################
+################################################
+resource "aws_glue_job" "etl_job" {
+  name     = "finsight-etl-job"
+  role_arn = aws_iam_role.glue_role.arn
+
+  command {
+    name            = "glueetl"
+    script_location = "s3://${aws_s3_bucket.processed_data.bucket}/scripts/etl_job.py"
+    python_version  = "3"
+  }
+
+  default_arguments = {
+    "--job-language"          = "python"
+    "--TempDir"               = "s3://${aws_s3_bucket.processed_data.bucket}/temp/"
+    "--enable-metrics"        = ""
+    "--enable-spark-ui"       = "true"
+    "--spark-event-logs-path" = "s3://${aws_s3_bucket.processed_data.bucket}/sparkHistoryLogs/"
+  }
+
+  glue_version = "3.0"
+  max_retries  = 0
+  timeout      = 60
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+}
+
+# IAM role that allows AWS Glue to assume and execute ETL jobs
+resource "aws_iam_role" "glue_role" {
+  name = "finsight-glue-job-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "glue.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Attach policies to the Glue role
+resource "aws_iam_role_policy_attachment" "glue_service" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+}
+
+resource "aws_iam_policy" "glue_s3_access" {
+  name        = "finsight-glue-s3-access"
+  description = "Allow Glue to access S3 buckets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.raw_data.bucket}",
+          "arn:aws:s3:::${aws_s3_bucket.raw_data.bucket}/*",
+          "arn:aws:s3:::${aws_s3_bucket.processed_data.bucket}",
+          "arn:aws:s3:::${aws_s3_bucket.processed_data.bucket}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "glue_s3_access" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = aws_iam_policy.glue_s3_access.arn
 }
