@@ -38,7 +38,6 @@ def lambda_handler(event, context):
         # You can set this as an environment variable or derive it from the input bucket
         raw_bucket = f"s3://{bucket}/"
         processed_bucket = os.environ.get("PROCESSED_BUCKET")
-
         if not processed_bucket:
             # If not provided as env var, derive it based on naming convention
             if "raw-input" in bucket:
