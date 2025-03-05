@@ -1,51 +1,66 @@
 import json
-import os
 import boto3
-import urllib.parse
-from datetime import datetime
-
-# Initialize Glue client
-glue_client = boto3.client("glue")
+import os
+from urllib.parse import unquote_plus
 
 
 def lambda_handler(event, context):
     """
-    Lambda function handler to trigger a Glue ETL job when new data is uploaded to S3.
-
-    Parameters:
-    - event: The event dict containing S3 bucket and object details
-    - context: Lambda context object
-
-    Returns:
-    - Response with details about the triggered Glue job
+    Lambda function that triggers a Glue ETL job when a new file is uploaded to S3.
+    Passes input and output bucket information to the Glue job.
     """
-    print("Received event:", json.dumps(event))
-
-    # Get environment variables
-    glue_job_name = os.environ.get("GLUE_JOB_NAME")
-    processed_bucket = os.environ.get("PROCESSED_BUCKET")
-
-    # Get bucket and object info from the event
-    bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    key = urllib.parse.unquote_plus(event["Records"][0]["s3"]["object"]["key"])
-
-    print(f"File uploaded: s3://{bucket}/{key}")
-
-    # Extract file name for job parameters
-    # Might contain invalid characters for Glue job arguments
-    file_name = os.path.basename(key)
-
-    # Get timestamp for job run
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-
-    # Start Glue job with parameters
     try:
+        # Get the S3 event details
+        print("Processing S3 event:", json.dumps(event))
+
+        # Get the bucket and key for the uploaded file
+        bucket = event["Records"][0]["s3"]["bucket"]["name"]
+        key = unquote_plus(event["Records"][0]["s3"]["object"]["key"])
+
+        print(f"File uploaded: s3://{bucket}/{key}")
+
+        # Skip processing if this is not a CSV file
+        if not key.lower().endswith(".csv"):
+            print(f"Skipping non-CSV file: {key}")
+            return {
+                "statusCode": 200,
+                "body": json.dumps(
+                    {"message": "File skipped (not a CSV)", "file": key}
+                ),
+            }
+
+        # Get Glue job name from environment variable
+        glue_job_name = os.environ.get("GLUE_JOB_NAME")
+        if not glue_job_name:
+            raise ValueError("GLUE_JOB_NAME environment variable not set")
+
+        # Get output bucket from environment variable or construct it
+        # You can set this as an environment variable or derive it from the input bucket
+        raw_bucket = f"s3://{bucket}/"
+        processed_bucket = os.environ.get("PROCESSED_BUCKET")
+
+        if not processed_bucket:
+            # If not provided as env var, derive it based on naming convention
+            if "raw-input" in bucket:
+                processed_bucket = (
+                    f"s3://{bucket.replace('raw-input', 'processed-output')}/"
+                )
+            else:
+                processed_bucket = f"s3://finsight-dev-processed-output-31v4pvuy/"
+
+        print(f"Input bucket: {raw_bucket}")
+        print(f"Output bucket: {processed_bucket}")
+
+        # Initialize Glue client
+        glue_client = boto3.client("glue")
+
+        # Start Glue job with arguments
         response = glue_client.start_job_run(
             JobName=glue_job_name,
             Arguments={
-                "--input_file_path": f"s3://{bucket}/{key}",
-                "--destination_bucket": processed_bucket,
-                "--job_run_id": f"job-run-{timestamp}",
+                "--input_bucket": raw_bucket,
+                "--output_bucket": processed_bucket,
+                "--file_name": key,
             },
         )
 
@@ -60,6 +75,8 @@ def lambda_handler(event, context):
                     "jobName": glue_job_name,
                     "jobRunId": job_run_id,
                     "processedFile": key,
+                    "inputBucket": raw_bucket,
+                    "outputBucket": processed_bucket,
                 }
             ),
         }

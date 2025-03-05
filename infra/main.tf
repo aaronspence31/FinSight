@@ -1,7 +1,6 @@
 ################################################
 ################## S3 Buckets ##################
 ################################################
-
 # Generate a random suffix to ensure bucket names are globally unique
 resource "random_string" "bucket_suffix" {
   length  = 8
