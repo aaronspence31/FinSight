@@ -215,8 +215,8 @@ resource "aws_glue_job" "etl_job" {
   role_arn = aws_iam_role.glue_role.arn
 
   # Worker configuration
-  worker_type       = "G.2X"
-  number_of_workers = 3
+  worker_type       = "G.4X"
+  number_of_workers = 5
 
   command {
     name            = "glueetl"
@@ -230,14 +230,13 @@ resource "aws_glue_job" "etl_job" {
     "--enable-metrics"        = ""
     "--enable-spark-ui"       = "true"
     "--spark-event-logs-path" = "s3://${aws_s3_bucket.processed_data.bucket}/sparkHistoryLogs/"
-
-    "--conf"                = "spark.sql.files.maxPartitionBytes=134217728" # 128MB
-    "--enable-auto-scaling" = "true"
+    "--enable-auto-scaling"   = "true"
+    "--enable-job-queuing"    = "true"
   }
 
   glue_version = "3.0"
-  max_retries  = 1
-  timeout      = 120
+  max_retries  = 0
+  timeout      = 60
 
   execution_property {
     max_concurrent_runs = 1
