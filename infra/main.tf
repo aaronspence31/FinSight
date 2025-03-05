@@ -215,8 +215,9 @@ resource "aws_glue_job" "etl_job" {
   role_arn = aws_iam_role.glue_role.arn
 
   # Worker configuration
-  worker_type       = "G.4X"
-  number_of_workers = 5
+  # Limit costs for testing
+  worker_type       = "G.1X"
+  number_of_workers = 2
 
   command {
     name            = "glueetl"
