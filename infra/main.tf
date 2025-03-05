@@ -215,6 +215,10 @@ resource "aws_glue_job" "etl_job" {
   name     = "finsight-etl-job"
   role_arn = aws_iam_role.glue_role.arn
 
+  # Worker configuration
+  worker_type       = "G.2X"
+  number_of_workers = 3
+
   command {
     name            = "glueetl"
     script_location = "s3://${aws_s3_bucket.processed_data.bucket}/scripts/etl_job.py"
@@ -227,11 +231,14 @@ resource "aws_glue_job" "etl_job" {
     "--enable-metrics"        = ""
     "--enable-spark-ui"       = "true"
     "--spark-event-logs-path" = "s3://${aws_s3_bucket.processed_data.bucket}/sparkHistoryLogs/"
+
+    "--conf"                = "spark.sql.files.maxPartitionBytes=134217728" # 128MB
+    "--enable-auto-scaling" = "true"
   }
 
   glue_version = "3.0"
-  max_retries  = 0
-  timeout      = 60
+  max_retries  = 1
+  timeout      = 120
 
   execution_property {
     max_concurrent_runs = 1
@@ -291,4 +298,24 @@ resource "aws_iam_policy" "glue_s3_access" {
 resource "aws_iam_role_policy_attachment" "glue_s3_access" {
   role       = aws_iam_role.glue_role.name
   policy_arn = aws_iam_policy.glue_s3_access.arn
+}
+
+################################################
+############ Athena ############################
+################################################
+# Create Athena database
+resource "aws_athena_database" "finsight_db" {
+  name   = "finsight_db"
+  bucket = aws_s3_bucket.processed_data.bucket
+}
+
+# Create Athena workgroup for query management
+resource "aws_athena_workgroup" "finsight_workgroup" {
+  name = "finsight-workgroup"
+
+  configuration {
+    result_configuration {
+      output_location = "s3://${aws_s3_bucket.processed_data.bucket}/athena-results/"
+    }
+  }
 }

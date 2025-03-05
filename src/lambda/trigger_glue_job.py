@@ -44,8 +44,6 @@ def lambda_handler(event, context):
             JobName=glue_job_name,
             Arguments={
                 "--input_file_path": f"s3://{bucket}/{key}",
-                "--source_bucket": bucket,
-                "--source_key": key,
                 "--destination_bucket": processed_bucket,
                 "--job_run_id": f"job-run-{timestamp}",
             },
