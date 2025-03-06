@@ -16,7 +16,6 @@ Here's a quick rundown of how FinSight operates:
 
 ## Watch FinSight in Action
 
-[![FinSight Demo Video](./assets/demo-thumbnail.png)](https://drive.google.com/file/d/YOUR_GOOGLE_DRIVE_FILE_ID/view)
 
 Click above to watch the demo video above shows:
 
