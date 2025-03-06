@@ -175,6 +175,43 @@ def get_query_by_type(query_type, params):
             ORDER BY date
         """
 
+    elif query_type == "allStocksTimeSeriesByPartition":
+        year = params.get("year", 2023)
+        month = params.get("month", 1)
+
+        return f"""
+            SELECT 
+                date, 
+                'MARKET_AVG' as symbol,
+                AVG(open) as open, 
+                AVG(high) as high, 
+                AVG(low) as low, 
+                AVG(close) as close, 
+                SUM(volume) as volume
+            FROM stock_data 
+            WHERE year = {year}
+            AND month = {month}
+            GROUP BY date
+            ORDER BY date
+        """
+
+    elif query_type == "allStocksVolumeAnalysisByPartition":
+        year = params.get("year", 2023)
+        month = params.get("month", 1)
+
+        return f"""
+            SELECT 
+                date,
+                'MARKET_AVG' as symbol,
+                SUM(volume) as volume,
+                AVG(close) as close
+            FROM stock_data
+            WHERE year = {year}
+            AND month = {month}
+            GROUP BY date
+            ORDER BY date
+        """
+
     # Default query - simple table preview
     return """
         SELECT * FROM stock_data LIMIT 10

@@ -48,6 +48,14 @@ class APIService {
 
   // Get stock time series data by year and month (using partitions)
   async getStockTimeSeriesByPartition(symbol, year, month) {
+    // If symbol is ANY, use a different query type
+    if (symbol === "ANY") {
+      return this.queryAthena("allStocksTimeSeriesByPartition", {
+        year: year,
+        month: month,
+      });
+    }
+
     return this.queryAthena("stockTimeSeriesByPartition", {
       symbol: symbol,
       year: year,
@@ -57,6 +65,14 @@ class APIService {
 
   // Get volume analysis data by year and month
   async getVolumeAnalysisByPartition(symbol, year, month) {
+    // If symbol is ANY, use a different query type
+    if (symbol === "ANY") {
+      return this.queryAthena("allStocksVolumeAnalysisByPartition", {
+        year: year,
+        month: month,
+      });
+    }
+
     return this.queryAthena("volumeAnalysisByPartition", {
       symbol: symbol,
       year: year,

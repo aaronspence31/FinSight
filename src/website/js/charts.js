@@ -8,13 +8,19 @@ class ChartService {
   renderStockChart(canvasId, data) {
     const ctx = document.getElementById(canvasId).getContext("2d");
 
+    // Destroy existing chart if it exists
+    if (window.stockChart && typeof window.stockChart.destroy === "function") {
+      window.stockChart.destroy();
+    }
+
     // Extract dates and prices from the data
     const dates = data.data.map((item) => item.date);
     const prices = data.data.map((item) => parseFloat(item.close));
 
-    // Destroy existing chart if it exists
-    if (window.stockChart && typeof window.stockChart.destroy === "function") {
-      window.stockChart.destroy();
+    // Get the display name for the chart title
+    let displayName = data.data[0]?.symbol || "Stock";
+    if (displayName === "MARKET_AVG") {
+      displayName = "Market Average";
     }
 
     // Create new chart
@@ -40,7 +46,7 @@ class ChartService {
         plugins: {
           title: {
             display: true,
-            text: `${data.data[0]?.symbol || "Stock"} Price History`,
+            text: `${displayName} Price History`,
           },
           tooltip: {
             mode: "index",
@@ -70,16 +76,22 @@ class ChartService {
   renderVolumeChart(canvasId, data) {
     const ctx = document.getElementById(canvasId).getContext("2d");
 
-    // Extract dates and volumes from the data
-    const dates = data.data.map((item) => item.date);
-    const volumes = data.data.map((item) => parseInt(item.volume));
-
     // Destroy existing chart if it exists
     if (
       window.volumeChart &&
       typeof window.volumeChart.destroy === "function"
     ) {
       window.volumeChart.destroy();
+    }
+
+    // Extract dates and volumes from the data
+    const dates = data.data.map((item) => item.date);
+    const volumes = data.data.map((item) => parseInt(item.volume));
+
+    // Get the display name for the chart title
+    let displayName = data.data[0]?.symbol || "Stock";
+    if (displayName === "MARKET_AVG") {
+      displayName = "Market Average";
     }
 
     // Create new chart
@@ -103,7 +115,7 @@ class ChartService {
         plugins: {
           title: {
             display: true,
-            text: `${data.data[0]?.symbol || "Stock"} Trading Volume`,
+            text: `${displayName} Trading Volume`,
           },
         },
         scales: {

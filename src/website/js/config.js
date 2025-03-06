@@ -4,7 +4,7 @@ const CONFIG = {
   apiUrl: "https://7eyfgtrwx8.execute-api.us-east-1.amazonaws.com/dev/query",
 
   // Default values
-  defaultStock: "AAPL",
+  defaultStock: "ANY",
   defaultYear: "2023",
   defaultMonth: "1",
 

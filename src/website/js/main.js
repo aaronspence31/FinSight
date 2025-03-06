@@ -58,8 +58,9 @@ async function loadStockData() {
       month
     );
     if (priceData.data.length === 0) {
+      const symbolDisplay = symbol === "ANY" ? "Market Average" : symbol;
       showError(
-        `No price data available for ${symbol} in ${getMonthName(
+        `No price data available for ${symbolDisplay} in ${getMonthName(
           month
         )} ${year}`
       );
