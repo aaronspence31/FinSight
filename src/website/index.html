@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSight Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>FinSight Dashboard</h1>
+    </header>
+    
+    <main>
+        <section id="stocks" class="page active">
+            <div class="status-indicator">
+                <div id="connection-status" class="status">Ready</div>
+            </div>
+            
+            <div class="filters">
+                <label>
+                    Symbol:
+                    <select id="stockSymbol">
+                        <option value="AAPL">Apple (AAPL)</option>
+                        <option value="MSFT">Microsoft (MSFT)</option>
+                        <option value="GOOGL">Alphabet/Google (GOOGL)</option>
+                        <option value="AMZN">Amazon (AMZN)</option>
+                        <option value="META">Meta/Facebook (META)</option>
+                        <option value="TSLA">Tesla (TSLA)</option>
+                        <option value="NVDA">NVIDIA (NVDA)</option>
+                        <option value="PYPL">PayPal (PYPL)</option>
+                        <option value="NFLX">Netflix (NFLX)</option>
+                        <option value="INTC">Intel (INTC)</option>
+                        <option value="AMD">AMD (AMD)</option>
+                        <option value="CSCO">Cisco (CSCO)</option>
+                        <option value="ORCL">Oracle (ORCL)</option>
+                        <option value="IBM">IBM (IBM)</option>
+                        <option value="ADBE">Adobe (ADBE)</option>
+                        <option value="CRM">Salesforce (CRM)</option>
+                        <option value="QCOM">Qualcomm (QCOM)</option>
+                        <option value="TXN">Texas Instruments (TXN)</option>
+                        <option value="AVGO">Broadcom (AVGO)</option>
+                        <option value="MU">Micron Technology (MU)</option>
+                    </select>
+                </label>
+                <label>
+                    Year:
+                    <select id="yearSelect">
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                        <option value="2017">2017</option>
+                        <option value="2016">2016</option>
+                        <option value="2015">2015</option>
+                        <option value="2014">2014</option>
+                        <option value="2013">2013</option>
+                        <option value="2012">2012</option>
+                        <option value="2011">2011</option>
+                        <option value="2010">2010</option>
+                        <option value="2009">2009</option>
+                        <option value="2008">2008</option>
+                        <option value="2007">2007</option>
+                        <option value="2006">2006</option>
+                        <option value="2005">2005</option>
+                        <option value="2004">2004</option>
+                        <option value="2003">2003</option>
+                        <option value="2002">2002</option>
+                        <option value="2001">2001</option>
+                        <option value="2000">2000</option>
+                    </select>
+                </label>
+                <label>
+                    Month:
+                    <select id="monthSelect">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </label>
+                <button id="updateChart">Load Data</button>
+            </div>
+            
+            <div class="card full-width">
+                <h3>Stock Closing Price History</h3>
+                <div class="chart-container">
+                    <canvas id="stockPriceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card full-width">
+                <h3>Volume Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

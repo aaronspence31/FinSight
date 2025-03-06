@@ -132,33 +132,76 @@ output "glue_iam_policy_arn" {
 }
 
 ################################################
-############## Summary Outputs #################
+############## API Gateway Outputs #############
 ################################################
-# These outputs provide comprehensive views of the entire infrastructure
+# These outputs provide access information for the API Gateway
 
-output "data_pipeline_summary" {
-  description = "Summary of the data pipeline components"
-  value = {
-    raw_data_bucket     = aws_s3_bucket.raw_data.bucket
-    processed_bucket    = aws_s3_bucket.processed_data.bucket
-    website_url         = "http://${aws_s3_bucket_website_configuration.website.website_endpoint}"
-    lambda_trigger_name = aws_lambda_function.trigger_glue_job.function_name
-    glue_job_name       = aws_glue_job.etl_job.name
-    athena_database     = aws_athena_database.finsight_db.name
-    environment         = var.environment
-    project             = var.project_name
-  }
-  # Consolidated overview of all key pipeline components
-  # Useful for documentation and quick reference
+output "api_gateway_url" {
+  description = "URL for the API Gateway endpoint"
+  value       = "${aws_api_gateway_deployment.finsight_api_deployment.invoke_url}${aws_api_gateway_resource.query.path}"
+  # The full URL to call for executing Athena queries
 }
 
-output "connection_instructions" {
-  description = "Instructions for connecting to different components"
+output "api_gateway_id" {
+  description = "ID of the API Gateway REST API"
+  value       = aws_api_gateway_rest_api.finsight_api.id
+  # Used for management and reference in AWS console
+}
+
+output "api_stage_name" {
+  description = "Deployment stage name for the API"
+  value       = var.environment
+  # The environment stage name used in the API URL
+}
+
+################################################
+########## Athena Query Lambda Outputs #########
+################################################
+# These outputs provide information about the Lambda that executes Athena queries
+
+output "athena_lambda_function_arn" {
+  description = "The ARN of the Athena query Lambda function"
+  value       = aws_lambda_function.athena_query.arn
+  # Reference ARN for the Lambda function that executes Athena queries
+}
+
+output "athena_lambda_function_name" {
+  description = "The name of the Athena query Lambda function"
+  value       = aws_lambda_function.athena_query.function_name
+  # Used when updating the function or viewing CloudWatch logs
+}
+
+output "athena_lambda_role_arn" {
+  description = "The ARN of the IAM role used by the Athena query Lambda"
+  value       = aws_iam_role.athena_lambda_role.arn
+  # IAM role that determines Lambda's permissions for Athena access
+}
+
+################################################
+########## Website Integration Outputs #########
+################################################
+# These outputs provide information for website-backend integration
+
+output "website_api_config" {
+  description = "Configuration details for website to connect to API"
+  value = {
+    api_url      = "${aws_api_gateway_deployment.finsight_api_deployment.invoke_url}${aws_api_gateway_resource.query.path}"
+    method       = "POST"
+    content_type = "application/json"
+    database     = aws_athena_database.finsight_db.name
+    table_name   = "stock_data" # This matches your ETL job's table name
+  }
+  # Complete configuration for the website JavaScript to connect to the API
+}
+
+# Update the connection_instructions with API information
+output "updated_connection_instructions" {
+  description = "Updated instructions for connecting to different components"
   value = {
     website      = "Visit http://${aws_s3_bucket_website_configuration.website.website_endpoint} in your browser"
     athena_query = "Use the AWS console or CLI to query data with: SELECT * FROM ${aws_athena_database.finsight_db.name}.stock_data LIMIT 10"
     upload_data  = "Upload CSV data to s3://${aws_s3_bucket.raw_data.bucket}/ to trigger the ETL pipeline"
+    api_usage    = "Make POST requests to ${aws_api_gateway_deployment.finsight_api_deployment.invoke_url}${aws_api_gateway_resource.query.path} with your query details"
   }
-  # User-friendly instructions for interacting with the infrastructure
-  # Can be used in documentation or shared with team members
+  # Enhanced instructions including API connection details
 }
