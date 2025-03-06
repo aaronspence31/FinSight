@@ -38,7 +38,8 @@ _Querying the processed data in Athena is dramatically faster than querying the 
 
 ### Interactive Dashboard
 
-![Web Dashboard](./assets/web-dashboard.png)
+![Web Dashboard All](./assets/web-dashboard-one.png)
+![Web Dashboard Apple](./assets/web-dashboard-two.png)
 _The web dashboard leverages the optimized data structure by executing queries that take advantage of the year/month partitioning, delivering fast insights from the financial data available in this case._
 
 ## The ETL Pipeline
