@@ -16,9 +16,9 @@ Here's a quick rundown of how FinSight operates:
 
 ## Watch FinSight in Action
 
-[![FinSight Demo Video](https://drive.google.com/file/d/1KmAVYZXQvGdQZ9Y4M-nWxJLAqy1DOTuj/view?usp=sharing)](https://drive.google.com/file/d/YOUR_GOOGLE_DRIVE_FILE_ID/view)
+[![FinSight Demo Video](./assets/demo-thumbnail.png)](https://drive.google.com/file/d/YOUR_GOOGLE_DRIVE_FILE_ID/view)
 
-The demo video above shows:
+Click above to watch the demo video above shows:
 
 - Uploading CSVs and triggering the ETL pipeline
 - Real-time data processing
