@@ -97,7 +97,7 @@ ORDER BY
 ```
 
 ![Athena Query Performance on Raw Data](./assets/input-data-athena-query-performance.png)
-_Querying the raw data requires Athena to scan the entire dataset, even though we're only interested in February 2024 data. This results in slower performance and higher costs._
+_Querying the raw data requires Athena to scan the entire dataset, even though we're only interested in February 2024 data. This results in slower performance and higher costs. You can see this as the input rows in the image are 39.31M and 85% of the total runtime is spent in execution._
 
 #### Query on Processed Data
 
@@ -121,7 +121,7 @@ ORDER BY
 ```
 
 ![Athena Query Performance on Processed Data](./assets/output-data-athena-query-performance.png)
-_Querying the processed data is significantly faster because Athena only needs to scan the relevant partition (year=2024, month=2) rather than the entire dataset. Note the difference in data scanned and execution time._
+_Querying the processed data is significantly faster because Athena only needs to scan the relevant partition (year=2024, month=2) rather than the entire dataset.You can see this as the input rows are now 210K rather than 39.31M and the execution time is only 53% while more time is spent planning now. The total runtime for the query dropped from 1.9 to 1.3 seconds and this differnece in performance should only grow as we store more data._
 
 ### Interactive Dashboard
 
@@ -152,14 +152,9 @@ _Detailed view of Apple stock performance. The dashboard executes queries that t
 
 ## AWS Infrastructure
 
-### Storage & Compute
-
 - **S3**: Handles raw CSV inputs, processed outputs, and hosts static web content.
 - **Lambda**: Manages file uploads and Athena queries efficiently.
 - **Glue**: Provides powerful, serverless PySpark transformations for ETL.
-
-### Data Access
-
 - **Athena**: Offers quick and simple SQL querying of processed data.
 - **API Gateway**: Makes sure web interface communicates smoothly and securely with backend services.
 
