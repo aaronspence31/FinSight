@@ -240,7 +240,7 @@ resource "aws_glue_job" "etl_job" {
   timeout      = 5
 
   execution_property {
-    max_concurrent_runs = 25
+    max_concurrent_runs = 100
   }
 }
 
