@@ -1,6 +1,6 @@
 # FinSight
 
-FinSight is a serverless ETL pipeline that simplifies financial data processing, complete with an interactive analytics dashboard, all hosted on AWS.
+FinSight is an AWS serverless ETL pipeline that transforms financial data so that it can be queried quickly, especially when filtered by year and month, complete with an interactive analytics dashboard which queries the transformed data.
 
 ## How It Works
 
