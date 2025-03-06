@@ -237,7 +237,7 @@ resource "aws_glue_job" "etl_job" {
 
   glue_version = "3.0"
   max_retries  = 0
-  timeout      = 60
+  timeout      = 5
 
   execution_property {
     max_concurrent_runs = 25

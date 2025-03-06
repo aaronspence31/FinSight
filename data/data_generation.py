@@ -25,6 +25,31 @@ symbols = [
     "TXN",
     "AVGO",
     "MU",
+    "JPM",
+    "BAC",
+    "WMT",
+    "DIS",
+    "SBUX",
+    "KO",
+    "PEP",
+    "JNJ",
+    "PFE",
+    "MRK",
+    "V",
+    "MA",
+    "HD",
+    "XOM",
+    "CVX",
+    "GE",
+    "BA",
+    "CMCSA",
+    "T",
+    "VZ",
+    "NKE",
+    "MCD",
+    "UNH",
+    "PG",
+    "GS",
 ]
 years = list(range(2000, 2025))
 
@@ -34,13 +59,15 @@ os.makedirs(output_dir, exist_ok=True)
 # Initialize base prices for each symbol once, for continuity across years
 base_prices = {symbol: np.random.uniform(50, 500) for symbol in symbols}
 
-# Generate data for each year
+# Generate data for each year, month, and symbol
+# All files will be in the top-level directory with descriptive filenames
 for year in years:
-    all_data = []  # Collect all data for the year
-
-    # Loop through all 12 months
     for month in range(1, 13):
+        month_name = datetime(year, month, 1).strftime("%b")
+
         for symbol in symbols:
+            symbol_data = []  # Collect data for this symbol for this month
+
             # Set base volume per symbol per month
             base_volume = np.random.randint(1000000, 20000000)
 
@@ -68,8 +95,8 @@ for year in years:
                 # Generate volume with randomness
                 volume = int(base_volume * np.random.uniform(0.5, 1.5))
 
-                # Add record to the year's data
-                all_data.append(
+                # Add record to the symbol's data for this month
+                symbol_data.append(
                     {
                         "date": date_str,
                         "symbol": symbol,
@@ -81,8 +108,12 @@ for year in years:
                     }
                 )
 
-    # Create DataFrame and save to CSV for the entire year
-    df = pd.DataFrame(all_data)
-    output_file = f"{output_dir}/stock_data_Y{year}.csv"
-    df.to_csv(output_file, index=False)
-    print(f"Generated {len(df)} records in {output_file}")
+            # Create DataFrame and save to CSV for this symbol for this month
+            if symbol_data:  # Only create file if there's data
+                df = pd.DataFrame(symbol_data)
+
+                # Create a descriptive filename with all necessary information
+                output_file = f"{output_dir}/stock_data_{symbol}_Y{year}_M{month:02d}_{month_name}.csv"
+
+                df.to_csv(output_file, index=False)
+                print(f"Generated {len(df)} records for {symbol} in {output_file}")

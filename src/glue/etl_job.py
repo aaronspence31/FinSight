@@ -14,6 +14,11 @@ def process(glue_context, input_path, output_path, file_name):
     partitioned by year and month for improved query performance.
     """
     try:
+        # Set Spark configuration for Parquet compression
+        glue_context.spark_session.conf.set(
+            "spark.sql.parquet.compression.codec", "snappy"
+        )
+
         print(f"Processing file: {input_path}{file_name}")
 
         # Read the CSV data from S3
@@ -70,6 +75,7 @@ def process(glue_context, input_path, output_path, file_name):
             enableUpdateCatalog=True,  # Automatically update the Data Catalog
             updateBehavior="UPDATE_IN_DATABASE",  # Add new partitions to existing table
             partitionKeys=["year", "month"],  # Partition by year and month
+            format_options={"compression": "snappy"},
         )
 
         # Set the database and table name in the Data Catalog

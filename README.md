@@ -37,7 +37,7 @@ Click above to watch the demo video above shows:
 - **Format and Type Conversions**: Cleans up dates and numeric fields for consistent analytics.
 - **Partitioning**: Automatically groups data by year and month for faster queries.
 - **Optimized Storage**: Converts CSV files into compressed Parquet files.
-- **Automatic Schema Updates**: Keeps your Glue Data Catalog updated effortlessly.
+- **Automatic Schema Updates**: Keeps Glue Data Catalog updated effortlessly.
 
 ### Load
 
@@ -55,7 +55,7 @@ Click above to watch the demo video above shows:
 ### Data Access
 
 - **Athena**: Offers quick and simple SQL querying.
-- **API Gateway**: Makes sure your web interface communicates smoothly and securely with backend services.
+- **API Gateway**: Makes sure web interface communicates smoothly and securely with backend services.
 
 ## Next Steps
 
@@ -67,7 +67,7 @@ Currently, FinSight is set up for data lake operations (S3 to Athena queries). A
 - **Why this matters**:
   - Faster complex queries and analytics
   - Better handling of multiple users and BI tools
-  - Advanced indexing to speed up your analytics workflow
+  - Advanced indexing to speed up analytics workflow
 
 ### Enhanced Processing
 
