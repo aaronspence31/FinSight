@@ -18,8 +18,11 @@ Here's a quick rundown of how FinSight operates:
 
 ### Triggering the ETL Pipeline
 
-![Uploading CSV and Triggering Glue Job](./assets/glue-job-trigger.gif)
-_When a CSV file is uploaded to the input S3 bucket, it automatically triggers the AWS Glue ETL job through a Lambda function._
+![Uploading CSV to S3](./assets/upload-csv.png)
+_Step 1: Uploading a CSV file to the input S3 bucket triggers the automated ETL process._
+
+![Glue Job Automatically Triggered](./assets/triggered-glue-job.png)
+_Step 2: The AWS Glue ETL job is automatically triggered through a Lambda function, beginning the data transformation process._
 
 ### Raw Input Data
 
