@@ -10,7 +10,7 @@ Here's a quick rundown of how FinSight operates:
 - Once uploaded, AWS immediately sends out an event notification.
 - A Lambda function receives this notification and kicks off an AWS Glue job.
 - AWS Glue performs the ETL process using PySpark, converting CSV to Parquet format, creating year/month partitions, and automatically updating the schema in the Data Catalog.
-- The processed data, now in an efficient Parquet format, gets stored back into S3. It’s neatly partitioned by year and month, significantly speeding up data access.
+- The processed data, now in an efficient Parquet format, gets stored back into S3. It's neatly partitioned by year and month, significantly speeding up data access.
 - You can then easily run SQL queries on this processed data using AWS Athena. These queries are extremely fast because they're optimized to leverage the year/month partitions.
 - To make things user-friendly, there's a simple frontend dashboard connected via API Gateway which calls a Lambda function to perform the Athena queries, which allows you to visualize the results of your queries. While it's straightforward, it's designed as a fun proof of concept to demonstrate the underlying ETL pipeline and the kinds of analytics it enables.
 
@@ -23,24 +23,113 @@ _When a CSV file is uploaded to the input S3 bucket, it automatically triggers t
 
 ### Raw Input Data
 
+![Raw Input Data Size in S3](./assets/raw-input-data-size.png)
+_The raw financial data in the input bucket takes up 1.9GB of storage space._
+
 ![Raw Input Data in S3](./assets/raw-input-data.png)
-_The raw financial data is initially stored as CSV files in the input S3 bucket, which is not optimized for analytical queries. There is 1.9GB of data in the input bucket._
+_The raw financial data is initially stored as CSV files in the input S3 bucket, which is not optimized for analytical queries._
+
+Example of a CSV file:
+
+```
+date,symbol,open,high,low,close,volume
+2023-01-03,AAPL,130.28,130.90,124.17,125.07,112117500
+2023-01-04,AAPL,126.89,128.66,125.08,126.36,89113600
+```
+
+#### Raw Data Table Definition
+
+The raw data is made accessible in Athena through the following table definition:
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS raw_stock_data (
+    date STRING,
+    symbol STRING,
+    open DOUBLE,
+    high DOUBLE,
+    low DOUBLE,
+    close DOUBLE,
+    volume BIGINT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION 's3://finsight-dev-raw-input-31v4pvuy/'
+TBLPROPERTIES ("skip.header.line.count"="1");
+```
+
+This table definition points directly to the CSV files in the input S3 bucket, allowing Athena to query the raw data without any optimizations.
 
 ### Processed Data with Partitioning
 
-![Processed Data in S3](./assets/processed-data.png)
-_After transformation, data is stored as Parquet files and partitioned by year and month (`/year=YYYY/month=MM/`), significantly improving query performance. Also after transformation, there is 745MB of data in the output bucket, reduced from 1.9GB._
+![Processed Data Size in S3](./assets/output-data-size.png)
+_After transformation, the data size is reduced from 1.9GB to 745MB, demonstrating the efficiency of Parquet format._
+
+![Processed Data in Parquet Format](./assets/output-data-parquet.png)
+_The transformed data is stored in the efficient Parquet format, which is columnar and compressed._
+
+![Year-based Partitioning](./assets/output-data-year-filtering-in-s3.png)
+_Data is partitioned by year, allowing for efficient filtering of queries by year._
+
+![Month-based Partitioning](./assets/output-data-month-filtering-in-s3.png)
+_Further partitioning by month (`/year=YYYY/month=MM/`) significantly improves query performance by allowing Athena to scan only relevant partitions._
 
 ### Query Performance Comparison
 
-![Athena Query Performance](./assets/query-performance.png)
-_Querying the processed data in Athena is dramatically faster than querying the raw data. Note how filtering by year/month on partitioned data executes in a second compared to three for the unprocessed data._
+#### Query on Raw Data
+
+The following query runs on the raw, unoptimized CSV data:
+
+```sql
+SELECT
+    date,
+    AVG(close) as avg_close,
+    SUM(volume) as total_volume,
+    COUNT(DISTINCT symbol) as symbol_count
+FROM
+    raw_stock_data
+WHERE
+    date LIKE '2024-02%'
+GROUP BY
+    date
+ORDER BY
+    date;
+```
+
+![Athena Query Performance on Raw Data](./assets/input-data-athena-query-performance.png)
+_Querying the raw data requires Athena to scan the entire dataset, even though we're only interested in February 2024 data. This results in slower performance and higher costs._
+
+#### Query on Processed Data
+
+The same query on the processed, partitioned Parquet data:
+
+```sql
+SELECT
+    date,
+    AVG(close) as avg_close,
+    SUM(volume) as total_volume,
+    COUNT(DISTINCT symbol) as symbol_count
+FROM
+    stock_data
+WHERE
+    year = 2024 AND
+    month = 2
+GROUP BY
+    date
+ORDER BY
+    date;
+```
+
+![Athena Query Performance on Processed Data](./assets/output-data-athena-query-performance.png)
+_Querying the processed data is significantly faster because Athena only needs to scan the relevant partition (year=2024, month=2) rather than the entire dataset. Note the difference in data scanned and execution time._
 
 ### Interactive Dashboard
 
-![Web Dashboard All](./assets/web-dashboard-one.png)
-![Web Dashboard Apple](./assets/web-dashboard-two.png)
-_The web dashboard leverages the optimized data structure by executing queries that take advantage of the year/month partitioning, delivering fast insights from the financial data available in this case._
+![Web Dashboard Overview](./assets/web-dashboard-one.png)
+_The web dashboard provides an overview of stock performance across all companies, leveraging the optimized data structure._
+
+![Web Dashboard Apple Details](./assets/web-dashboard-two.png)
+_Detailed view of Apple stock performance. The dashboard executes queries that take advantage of the year/month partitioning, delivering fast insights from the financial data._
 
 ## The ETL Pipeline
 
@@ -76,16 +165,19 @@ _The web dashboard leverages the optimized data structure by executing queries t
 
 ## Next Steps
 
-### Moving from Data Lake to Data Warehouse
+### Data Warehouse Integration
 
-Currently, FinSight is set up for data lake operations (S3 to Athena queries). An exciting next step would be to extend this into a fully-fledged data warehouse:
+The current implementation successfully demonstrates a data lake architecture with S3 and Athena where we go from S3 to S3. A logical next step would be to integrate with Amazon Redshift to:
 
-- **Redshift Integration**: Modify the Glue ETL to directly load data into Amazon Redshift.
-- **Why this matters**:
-  - Faster complex queries and analytics
-  - Better handling of multiple users and BI tools
-  - Advanced indexing to speed up analytics workflow
+- Support more complex analytical queries that benefit from Redshift's columnar storage and distributed query execution
+- Enable more concurrent users as the dashboard usage grows
+- Leverage Redshift Spectrum to query both the data warehouse and data lake simultaneously
 
-### Enhanced Processing
+### Enhanced ETL Processing
 
-The current setup using AWS Glue is excellent for serverless operation and pretty simple PySpark transformations like have been done so far in this project. As data processing demands grow, I might explore more robust tools like EMR (Elastic MapReduce), which would offer greater flexibility, custom Spark setups, and better control for optimizing performance in more demanding analytical workloads. I also might explore even doing more complex or other transformations with AWS Glue alone while using Dynamic Frames more than Data Frames as I did for this project.
+Building on the current Glue ETL job, future enhancements could include:
+
+- Migrating to Amazon EMR (Elastic MapReduce) for more complex transformations that require fine-tuned control over the Spark environment
+- Implementing more sophisticated transformations using AWS Glue Dynamic Frames
+- Creating additional partitioning schemes based on actual query patterns
+- Implementing incremental processing to handle only new or changed data
