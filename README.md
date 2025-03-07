@@ -57,7 +57,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS raw_stock_data (
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
-LOCATION 's3://finsight-dev-raw-input-31v4pvuy/'
+LOCATION 's3://finsight-dev-raw-input-xxxxx/'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
