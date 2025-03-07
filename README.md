@@ -30,7 +30,7 @@ _Step 2: The AWS Glue ETL job is automatically triggered through a Lambda functi
 _The raw financial data in the input bucket takes up 1.9GB of storage space._
 
 ![Raw Input Data in S3](./assets/raw-input-data.png)
-_The raw financial data is initially stored as CSV files in the input S3 bucket, which is not optimized for analytical queries._
+_The raw financial data is initially stored as CSV files in the input S3 bucket, which is not optimized querying._
 
 Example of a CSV file:
 
@@ -75,7 +75,7 @@ _The transformed data is stored in the efficient Parquet format, which is column
 _Data is partitioned by year, allowing for efficient filtering of queries by year._
 
 ![Month-based Partitioning](./assets/output-data-month-filtering-in-s3.png)
-_Further partitioning by month (`/year=YYYY/month=MM/`) significantly improves query performance by allowing Athena to scan only relevant partitions._
+_Further partitioning by month (`/year=YYYY/month=MM/`) improves query performance by allowing Athena to scan only relevant partitions._
 
 ### Query Performance Comparison
 
@@ -156,9 +156,9 @@ _Detailed view of Apple stock performance. The dashboard executes queries that t
 ## AWS Infrastructure
 
 - **S3**: Handles raw CSV inputs, processed outputs, and hosts static web content.
-- **Lambda**: Manages file uploads and Athena queries efficiently.
-- **Glue**: Provides powerful, serverless PySpark transformations for ETL.
-- **Athena**: Offers quick and simple SQL querying of processed data.
+- **Lambda**: Manages file uploads and Athena queries.
+- **Glue**: Serverless ETL.
+- **Athena**: Offers simple SQL querying of processed and unprocessed data in S3.
 - **API Gateway**: Makes sure web interface communicates smoothly and securely with backend services.
 
 ## Next Steps
