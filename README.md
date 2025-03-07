@@ -169,7 +169,6 @@ The current implementation successfully demonstrates a data lake architecture wi
 
 - Support more complex analytical queries that benefit from Redshift's columnar storage and distributed query execution
 - Enable more concurrent users as the dashboard usage grows
-- Leverage Redshift Spectrum to query both the data warehouse and data lake simultaneously
 
 ### Enhanced ETL Processing
 
@@ -178,4 +177,3 @@ Building on the current Glue ETL job, future enhancements could include:
 - Migrating to Amazon EMR (Elastic MapReduce) for more complex transformations that require fine-tuned control over the Spark environment
 - Implementing more sophisticated transformations using AWS Glue Dynamic Frames
 - Creating additional partitioning schemes based on actual query patterns
-- Implementing incremental processing to handle only new or changed data
