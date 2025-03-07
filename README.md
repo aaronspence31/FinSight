@@ -146,7 +146,7 @@ _Detailed view of Apple stock performance. The dashboard executes queries that t
 - **Format and Type Conversions**: Cleans up dates and numeric fields for consistent analytics.
 - **Partitioning**: Automatically groups data by year and month for faster queries.
 - **Optimized Storage**: Converts CSV files into compressed Parquet files.
-- **Automatic Schema Updates**: Keeps Glue Data Catalog updated effortlessly.
+- **Automatic Schema Updates**: Keeps Glue Data Catalog updated effortlessly. We should not have any issues when querying as long as the data types for all columns remain consistent. Columns can be added or removed between schema updates.
 
 ### Load
 

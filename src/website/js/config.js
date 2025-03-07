@@ -1,7 +1,7 @@
 // Configuration for the FinSight dashboard
 const CONFIG = {
   // API endpoint for Athena queries
-  apiUrl: "https://7eyfgtrwx8.execute-api.us-east-1.amazonaws.com/dev/query",
+  apiUrl: "https://xxxxxx.execute-api.us-east-1.amazonaws.com/dev/query",
 
   // Default values
   defaultStock: "ANY",
