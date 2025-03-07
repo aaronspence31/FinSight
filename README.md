@@ -175,5 +175,5 @@ The current implementation successfully demonstrates a data lake architecture wi
 Building on the current Glue ETL job, future enhancements could include:
 
 - Migrating to Amazon EMR (Elastic MapReduce) for more complex transformations that require fine-tuned control over the Spark environment
-- Implementing more sophisticated transformations using AWS Glue Dynamic Frames
+- Implementing more sophisticated transformations in general as well as using AWS Glue Dynamic Frames
 - Creating additional partitioning schemes based on actual query patterns
