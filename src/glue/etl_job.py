@@ -21,7 +21,7 @@ def process(glue_context, input_path, output_path, file_name):
 
         print(f"Processing file: {input_path}{file_name}")
 
-        # Read the CSV data from S3
+        # Read the CSV data from S3 using Dynamic Frame to allow for schema flexibility
         dynamic_frame = glue_context.create_dynamic_frame.from_options(
             connection_type="s3",
             connection_options={"paths": [f"{input_path}{file_name}"]},
@@ -32,7 +32,7 @@ def process(glue_context, input_path, output_path, file_name):
             },
         )
 
-        # Convert to DataFrame for easier processing
+        # Convert to DataFrame to apply some specific transformations
         df = dynamic_frame.toDF()
 
         # Validate if we have data
@@ -45,7 +45,7 @@ def process(glue_context, input_path, output_path, file_name):
         # Convert date string to date type
         df = df.withColumn("date", F.to_date(df["date"], "yyyy-MM-dd"))
 
-        # Add year and month columns for partitioning
+        # Extract and add year and month columns for partitioning
         df = df.withColumn("year", F.year(df["date"]))
         df = df.withColumn("month", F.month(df["date"]))
 
@@ -57,33 +57,31 @@ def process(glue_context, input_path, output_path, file_name):
         # Cast volume to long for large numbers
         df = df.withColumn("volume", df["volume"].cast("long"))
 
+        # Print schema after transformations performed
         print("Schema after transformations:")
         df.printSchema()
 
         # Create dynamic frame from dataframe for writing
+        # Dynamic Frame is used to write to S3 as we can use the getSink method with dynamic frames
+        # to easily write to S3 with partitioning and catalog updates
         dynamic_frame_output = DynamicFrame.fromDF(
             df, glue_context, "dynamic_frame_output"
         )
 
-        # Write to S3 with partitioning by year and month
         print(f"Writing processed data to: {output_path}")
 
         # Configure the sink with partitioning and catalog updates
         sink = glue_context.getSink(
             connection_type="s3",
             path=output_path,
-            enableUpdateCatalog=True,  # Automatically update the Data Catalog
-            updateBehavior="UPDATE_IN_DATABASE",  # Add new partitions to existing table
-            partitionKeys=["year", "month"],  # Partition by year and month
+            enableUpdateCatalog=True,
+            updateBehavior="UPDATE_IN_DATABASE",
+            partitionKeys=["year", "month"],
             format_options={"compression": "snappy"},
         )
-
-        # Set the database and table name in the Data Catalog
         sink.setCatalogInfo(
             catalogDatabase="finsight_db", catalogTableName="stock_data"
         )
-
-        # Set output format to Parquet
         sink.setFormat(format="glueparquet")
 
         # Write the data
@@ -99,12 +97,9 @@ def process(glue_context, input_path, output_path, file_name):
 
 def main():
     """Main ETL job function"""
-    # Get job parameters
     args = getResolvedOptions(
         sys.argv, ["JOB_NAME", "input_bucket", "output_bucket", "file_name"]
     )
-
-    # Print the input parameters
     print("Job Parameters:")
     print(f"  input_bucket: {args['input_bucket']}")
     print(f"  output_bucket: {args['output_bucket']}")
@@ -113,7 +108,6 @@ def main():
     # Initialize Spark and Glue contexts
     sc = SparkContext()
     glue_context = GlueContext(sc)
-    spark = glue_context.spark_session
     job = Job(glue_context)
     job.init(args["JOB_NAME"], args)
 
@@ -142,6 +136,5 @@ def main():
         print("Job resources cleaned up")
 
 
-# Entry point
 if __name__ == "__main__":
     main()

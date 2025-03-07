@@ -146,7 +146,7 @@ _Detailed view of Apple stock performance. The dashboard executes queries that t
 - **Format and Type Conversions**: Cleans up dates and numeric fields for consistent analytics.
 - **Partitioning**: Automatically groups data by year and month for faster queries.
 - **Optimized Storage**: Converts CSV files into compressed Parquet files.
-- **Automatic Schema Updates**: Keeps Glue Data Catalog updated effortlessly. We should not have any issues when querying as long as the data types for all columns remain consistent. Columns can be added or removed between schema updates.
+- **Automatic Schema Updates**: Keeps Glue Data Catalog updated effortlessly. We should not have any issues when querying as long as the data types for all columns remain consistent (if they are not consistent you might get query failures or unexpected type conversions if Athena is not able to infer the correct type). Columns can be added or removed between schema updates, however, our ETL transformations do require certain core columns (date, price fields, volume) to be present in all input data.
 
 ### Load
 
@@ -174,6 +174,6 @@ The current implementation successfully demonstrates a data lake architecture wi
 
 Building on the current Glue ETL job, future enhancements could include:
 
-- Migrating to Amazon EMR (Elastic MapReduce) for more complex transformations that require fine-tuned control over the Spark environment
-- Implementing more sophisticated transformations in general as well as using AWS Glue Dynamic Frames
-- Creating additional partitioning schemes based on actual query patterns
+- Implement more sophisticated transformations using AWS Glue
+- Create additional partitioning schemes based on other query patterns
+- Try using Amazon EMR (Elastic MapReduce) for more complex transformations that require fine-tuned control over the Spark environment
