@@ -4,8 +4,6 @@ FinSight is an AWS serverless ETL pipeline that transforms financial data so tha
 
 ## How It Works
 
-FinSight is a serverless analytics pipeline on AWS:
-
 - **Data Ingestion**: Upload CSV files with financial data to an S3 bucket to trigger the entire process automatically.
 - **Serverless Processing**: A notification system activates Lambda functions that orchestrate the ETL workflow without requiring any infrastructure management.
 - **Data Transformation**: Behind the scenes, AWS Glue transforms raw data into an optimized format with intelligent partitioning for high-performance querying.
